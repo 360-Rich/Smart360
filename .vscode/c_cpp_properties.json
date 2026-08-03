@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "name": "Smart360 Firmware",
+      "includePath": [
+        "c:/Users/rstri/Smart360/Smart360/firmware/core/include",
+        "c:/Users/rstri/Smart360/Smart360/firmware/core/src",
+        "c:/Users/rstri/Smart360/Smart360/firmware/core",
+        "c:/Users/rstri/.platformio/packages/framework-arduinoespressif32/cores/esp32",
+        "c:/Users/rstri/.platformio/packages/framework-arduinoespressif32/variants/esp32",
+        "c:/Users/rstri/.platformio/packages/framework-arduinoespressif32/libraries"
+      ],
+      "browse": {
+        "path": [
+          "c:/Users/rstri/Smart360/Smart360/firmware/core/include",
+          "c:/Users/rstri/Smart360/Smart360/firmware/core/src",
+          "c:/Users/rstri/Smart360/Smart360/firmware/core",
+          "c:/Users/rstri/.platformio/packages/framework-arduinoespressif32/cores/esp32",
+          "c:/Users/rstri/.platformio/packages/framework-arduinoespressif32/variants/esp32",
+          "c:/Users/rstri/.platformio/packages/framework-arduinoespressif32/libraries"
+        ]
+      },
+      "cppStandard": "c++17",
+      "intelliSenseMode": "windows-gcc-x64"
+    }
+  ],
+  "version": 4
+}
