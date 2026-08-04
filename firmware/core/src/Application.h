@@ -1,14 +1,2 @@
-#ifndef SMART360_APP_H
-#define SMART360_APP_H
-
-class App
-{
-public:
-
-    void begin();
-
-    void update();
-
-};
-
-#endif
+#pragma once
+namespace Smart360{class Application{public:void begin();void update();};}
