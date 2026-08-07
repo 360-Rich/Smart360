@@ -1,3 +1,16 @@
 #include <Arduino.h>
-#include "Application.h"
-Smart360::Application app; void setup(){app.begin();} void loop(){app.update();}
+#include "services/Logger.h"
+
+using namespace Smart360;
+
+void setup()
+{
+    Logger::begin();
+
+    Logger::info("System booting...");
+    Logger::info("Logger online");
+}
+
+void loop()
+{
+}
