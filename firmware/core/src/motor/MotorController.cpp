@@ -8,26 +8,54 @@ void MotorController::initialize()
 {
     state = MotorState{};
     profile = MotionProfile{};
+
+    state.mode = MotorMode::Ready;
 }
 
 void MotorController::update(float deltaTime)
 {
-    if (!profile.validate())
+    if (deltaTime <= 0.0f || !profile.validate())
     {
         return;
     }
 
+    state.targetPosition = profile.targetPosition;
+
+    const float targetVelocity =
+        profile.maxVelocity *
+        static_cast<float>(profile.direction);
+
     state.velocity = RampGenerator::calculateVelocity(
         state.velocity,
-        profile.maxVelocity *
-            static_cast<float>(profile.direction),
+        targetVelocity,
         profile.maxAcceleration,
         profile.maxDeceleration,
         deltaTime);
 
-    state.targetPosition = profile.targetPosition;
+    const float nextPosition =
+        state.position + (state.velocity * deltaTime);
 
-    state.position += state.velocity * deltaTime;
+    if (profile.direction == MotionDirection::Forward &&
+        nextPosition >= profile.targetPosition)
+    {
+        state.position = profile.targetPosition;
+        state.velocity = 0.0f;
+        state.direction = MotorDirection::Stopped;
+        state.mode = MotorMode::Ready;
+        return;
+    }
+
+    if (profile.direction == MotionDirection::Reverse &&
+        nextPosition <= profile.targetPosition)
+    {
+        state.position = profile.targetPosition;
+        state.velocity = 0.0f;
+        state.direction = MotorDirection::Stopped;
+        state.mode = MotorMode::Ready;
+        return;
+    }
+
+    state.position = nextPosition;
 
     if (state.velocity > 0.0f)
     {
@@ -41,6 +69,8 @@ void MotorController::update(float deltaTime)
     {
         state.direction = MotorDirection::Stopped;
     }
+
+    state.mode = MotorMode::Moving;
 }
 
 void MotorController::setTarget(const MotionProfile& newProfile)
@@ -61,6 +91,7 @@ void MotorController::stop()
 
     state.velocity = 0.0f;
     state.direction = MotorDirection::Stopped;
+    state.mode = MotorMode::Ready;
 }
 
 const MotorState& MotorController::getState() const
@@ -68,4 +99,4 @@ const MotorState& MotorController::getState() const
     return state;
 }
 
-} // namespace Smart360
+}// namespace Smart360
