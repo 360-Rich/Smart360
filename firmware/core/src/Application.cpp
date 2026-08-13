@@ -12,6 +12,7 @@ namespace
 {
     unsigned long lastDiagnostics = 0;
     constexpr unsigned long DIAGNOSTICS_INTERVAL = 30000;
+    constexpr unsigned long MOTOR_REPORT_INTERVAL = 250;
 }
 
 namespace Smart360
@@ -51,24 +52,39 @@ void Application::begin()
 
 void Application::update()
 {
-    static unsigned long lastMotorTest = 0;
+    static unsigned long lastMotorUpdate = 0;
+    static unsigned long lastMotorReport = 0;
 
     const unsigned long now = millis();
+    
 
-    if (now - lastMotorTest >= 1000)
+    if (lastMotorUpdate == 0)
     {
-        lastMotorTest = now;
+        lastMotorUpdate = now;
+    }
+    else
+    {
+        const float deltaTime =
+            static_cast<float>(now - lastMotorUpdate) / 1000.0f;
 
-        motorController.update(1.0f);
+        lastMotorUpdate = now;
 
-        const MotorState& state = motorController.getState();
+        motorController.update(deltaTime);
 
-        Serial.printf(
-            "[MOTOR] Position=%.2f | Target=%.2f | Velocity=%.2f | Direction=%d\n",
-            state.position,
-            state.targetPosition,
-            state.velocity,
-            static_cast<int>(state.direction));
+        if (now - lastMotorReport >= MOTOR_REPORT_INTERVAL)
+        {
+            lastMotorReport = now;
+
+            const MotorState& state = motorController.getState();
+
+            Serial.printf(
+                "[MOTOR] dt=%.3f | Position=%.2f | Target=%.2f | Velocity=%.2f | Direction=%d\n",
+                deltaTime,
+                state.position,
+                state.targetPosition,
+                state.velocity,
+                static_cast<int>(state.direction));
+        }
     }
 
     if (now - lastDiagnostics >= DIAGNOSTICS_INTERVAL)
