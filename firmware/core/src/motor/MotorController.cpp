@@ -9,7 +9,7 @@ void MotorController::initialize()
     state = MotorState{};
     profile = MotionProfile{};
 
-    state.mode = MotorMode::Ready;
+    state.mode = MotorMode::Idle;
 }
 
 void MotorController::update(float deltaTime)
@@ -17,6 +17,11 @@ void MotorController::update(float deltaTime)
     if (deltaTime <= 0.0f || !profile.validate())
     {
         return;
+    }
+
+    if (state.mode == MotorMode::Ready)
+    {
+        state.mode = MotorMode::Moving;
     }
 
     state.targetPosition = profile.targetPosition;
@@ -69,8 +74,6 @@ void MotorController::update(float deltaTime)
     {
         state.direction = MotorDirection::Stopped;
     }
-
-    state.mode = MotorMode::Moving;
 }
 
 void MotorController::setTarget(const MotionProfile& newProfile)
@@ -78,11 +81,14 @@ void MotorController::setTarget(const MotionProfile& newProfile)
     if (!newProfile.validate())
     {
         profile.valid = false;
+        state.mode = MotorMode::Fault;
         return;
     }
 
     profile = newProfile;
     profile.valid = true;
+
+    state.mode = MotorMode::Ready;
 }
 
 void MotorController::stop()
@@ -99,4 +105,4 @@ const MotorState& MotorController::getState() const
     return state;
 }
 
-}// namespace Smart360
+} // namespace Smart360
