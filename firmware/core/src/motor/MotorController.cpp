@@ -97,7 +97,7 @@ void MotorController::stop()
 
     state.velocity = 0.0f;
     state.direction = MotorDirection::Stopped;
-    state.mode = MotorMode::Ready;
+    state.mode = MotorMode::Idle;
 }
 
 const MotorState& MotorController::getState() const
