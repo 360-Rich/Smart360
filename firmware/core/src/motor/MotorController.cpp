@@ -14,7 +14,45 @@ void MotorController::initialize()
 
 void MotorController::update(float deltaTime)
 {
-    if (deltaTime <= 0.0f || !profile.validate())
+    if (deltaTime <= 0.0f)
+    {
+        return;
+    }
+
+    // Stop / deceleration phase
+    if (!profile.valid)
+    {
+        if (state.velocity == 0.0f)
+        {
+            return;
+        }
+
+        const float previousVelocity = state.velocity;
+
+        state.velocity = RampGenerator::calculateVelocity(
+            state.velocity,
+            0.0f,
+            profile.maxAcceleration,
+            profile.maxDeceleration,
+            deltaTime);
+
+        state.acceleration =
+            (state.velocity - previousVelocity) / deltaTime;
+
+        state.position += state.velocity * deltaTime;
+
+        if (state.velocity == 0.0f)
+        {
+            state.acceleration = 0.0f;
+            state.direction = MotorDirection::Stopped;
+            state.mode = MotorMode::Idle;
+        }
+
+        return;
+    }
+
+    // Normal commanded motion
+    if (!profile.validate())
     {
         return;
     }
@@ -106,9 +144,15 @@ void MotorController::stop()
 {
     profile.valid = false;
 
-    state.velocity = 0.0f;
-    state.direction = MotorDirection::Stopped;
-    state.mode = MotorMode::Idle;
+    if (state.velocity == 0.0f)
+    {
+        state.acceleration = 0.0f;
+        state.direction = MotorDirection::Stopped;
+        state.mode = MotorMode::Idle;
+        return;
+    }
+
+    state.mode = MotorMode::Moving;
 }
 
 const MotorState& MotorController::getState() const
