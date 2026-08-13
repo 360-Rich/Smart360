@@ -30,12 +30,17 @@ void MotorController::update(float deltaTime)
         profile.maxVelocity *
         static_cast<float>(profile.direction);
 
+    const float previousVelocity = state.velocity;
+
     state.velocity = RampGenerator::calculateVelocity(
         state.velocity,
         targetVelocity,
         profile.maxAcceleration,
         profile.maxDeceleration,
         deltaTime);
+
+    state.acceleration =
+        (state.velocity - previousVelocity) / deltaTime;
 
     const float nextPosition =
         state.position + (state.velocity * deltaTime);
@@ -45,6 +50,7 @@ void MotorController::update(float deltaTime)
     {
         state.position = profile.targetPosition;
         state.velocity = 0.0f;
+        state.acceleration = 0.0f;
         state.direction = MotorDirection::Stopped;
         state.mode = MotorMode::Ready;
         return;
@@ -55,6 +61,7 @@ void MotorController::update(float deltaTime)
     {
         state.position = profile.targetPosition;
         state.velocity = 0.0f;
+        state.acceleration = 0.0f;
         state.direction = MotorDirection::Stopped;
         state.mode = MotorMode::Ready;
         return;
@@ -88,6 +95,10 @@ void MotorController::setTarget(const MotionProfile& newProfile)
     profile = newProfile;
     profile.valid = true;
 
+    state.targetPosition = profile.targetPosition;
+    state.maxVelocity = profile.maxVelocity;
+    state.maxAcceleration = profile.maxAcceleration;
+    state.acceleration = 0.0f;
     state.mode = MotorMode::Ready;
 }
 

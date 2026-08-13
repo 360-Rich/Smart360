@@ -78,11 +78,12 @@ void Application::update()
             const MotorState& state = motorController.getState();
 
             Serial.printf(
-                "[MOTOR] dt=%.3f | Position=%.2f | Target=%.2f | Velocity=%.2f | Direction=%d\n",
+                "[MOTOR] dt=%.3f | Position=%.2f | Target=%.2f | Velocity=%.2f | Acceleration=%.2f | Direction=%d\n",
                 deltaTime,
                 state.position,
                 state.targetPosition,
                 state.velocity,
+                state.acceleration,
                 static_cast<int>(state.direction));
         }
     }
