@@ -54,7 +54,6 @@ void Application::update()
 {
     static unsigned long lastMotorUpdate = 0;
     static unsigned long lastMotorReport = 0;
-    static bool stopRequested = false;
 
     const unsigned long now = millis();
 
@@ -72,14 +71,6 @@ void Application::update()
         motorController.update(deltaTime);
 
         const MotorState& state = motorController.getState();
-
-        // Test: request a controlled stop once the motor reaches 30.
-        if (!stopRequested && state.position >= 30.0f)
-        {
-            Logger::info("Motor stop requested");
-            motorController.stop();
-            stopRequested = true;
-        }
 
         if (now - lastMotorReport >= MOTOR_REPORT_INTERVAL)
         {
