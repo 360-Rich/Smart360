@@ -275,6 +275,86 @@ void test_motor_reverse_motion_reaches_target_and_stops()
         static_cast<int>(state.mode));
 }
 
+void test_motor_update_with_zero_delta_time_does_nothing()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = 100.0f;
+    profile.maxVelocity = 50.0f;
+    profile.maxAcceleration = 25.0f;
+    profile.maxDeceleration = 25.0f;
+    profile.direction = MotionDirection::Forward;
+
+    motor.setTarget(profile);
+
+    motor.update(0.0f);
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.position);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.velocity);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.acceleration);
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Ready),
+        static_cast<int>(state.mode));
+}
+
+void test_motor_update_with_negative_delta_time_does_nothing()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = 100.0f;
+    profile.maxVelocity = 50.0f;
+    profile.maxAcceleration = 25.0f;
+    profile.maxDeceleration = 25.0f;
+    profile.direction = MotionDirection::Forward;
+
+    motor.setTarget(profile);
+
+    motor.update(-0.1f);
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.position);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.velocity);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.acceleration);
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Ready),
+        static_cast<int>(state.mode));
+}
+
 void setup()
 {
     delay(1000);
@@ -288,6 +368,8 @@ void setup()
     RUN_TEST(test_motor_reaches_target_and_stops);
     RUN_TEST(test_motor_controlled_stop_decelerates_to_idle);
     RUN_TEST(test_motor_reverse_motion_reaches_target_and_stops);
+    RUN_TEST(test_motor_update_with_zero_delta_time_does_nothing);
+    RUN_TEST(test_motor_update_with_negative_delta_time_does_nothing);
 
     UNITY_END();
 }
