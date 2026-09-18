@@ -355,6 +355,75 @@ void test_motor_update_with_negative_delta_time_does_nothing()
         static_cast<int>(state.mode));
 }
 
+void test_zero_max_acceleration_enters_fault_state()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = 100.0f;
+    profile.maxVelocity = 50.0f;
+    profile.maxAcceleration = 0.0f;
+    profile.maxDeceleration = 25.0f;
+    profile.direction = MotionDirection::Forward;
+
+    motor.setTarget(profile);
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Fault),
+        static_cast<int>(state.mode));
+}
+
+void test_zero_max_deceleration_enters_fault_state()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = 100.0f;
+    profile.maxVelocity = 50.0f;
+    profile.maxAcceleration = 25.0f;
+    profile.maxDeceleration = 0.0f;
+    profile.direction = MotionDirection::Forward;
+
+    motor.setTarget(profile);
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Fault),
+        static_cast<int>(state.mode));
+}
+
+void test_negative_max_velocity_enters_fault_state()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = 100.0f;
+    profile.maxVelocity = -50.0f;
+    profile.maxAcceleration = 25.0f;
+    profile.maxDeceleration = 25.0f;
+    profile.direction = MotionDirection::Forward;
+
+    motor.setTarget(profile);
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Fault),
+        static_cast<int>(state.mode));
+}
+
 void setup()
 {
     delay(1000);
@@ -370,6 +439,9 @@ void setup()
     RUN_TEST(test_motor_reverse_motion_reaches_target_and_stops);
     RUN_TEST(test_motor_update_with_zero_delta_time_does_nothing);
     RUN_TEST(test_motor_update_with_negative_delta_time_does_nothing);
+    RUN_TEST(test_zero_max_acceleration_enters_fault_state);
+    RUN_TEST(test_zero_max_deceleration_enters_fault_state);
+    RUN_TEST(test_negative_max_velocity_enters_fault_state);
 
     UNITY_END();
 }
