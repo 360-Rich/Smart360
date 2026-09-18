@@ -176,6 +176,105 @@ void test_motor_reaches_target_and_stops()
         static_cast<int>(state.mode));
 }
 
+void test_motor_controlled_stop_decelerates_to_idle()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = 100.0f;
+    profile.maxVelocity = 50.0f;
+    profile.maxAcceleration = 25.0f;
+    profile.maxDeceleration = 25.0f;
+    profile.direction = MotionDirection::Forward;
+
+    motor.setTarget(profile);
+
+    // Build up some forward velocity.
+    motor.update(0.1f);
+    motor.update(0.1f);
+    motor.update(0.1f);
+
+    TEST_ASSERT_TRUE(motor.getState().velocity > 0.0f);
+
+    motor.stop();
+
+    // Allow the controller to decelerate to zero.
+    for (int i = 0; i < 100; ++i)
+    {
+        motor.update(0.1f);
+    }
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.velocity);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.acceleration);
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorDirection::Stopped),
+        static_cast<int>(state.direction));
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Idle),
+        static_cast<int>(state.mode));
+}
+
+void test_motor_reverse_motion_reaches_target_and_stops()
+{
+    MotorController motor;
+
+    motor.initialize();
+
+    MotionProfile profile;
+
+    profile.targetPosition = -10.0f;
+    profile.maxVelocity = 50.0f;
+    profile.maxAcceleration = 25.0f;
+    profile.maxDeceleration = 25.0f;
+    profile.direction = MotionDirection::Reverse;
+
+    motor.setTarget(profile);
+
+    for (int i = 0; i < 100; ++i)
+    {
+        motor.update(0.1f);
+    }
+
+    const MotorState& state = motor.getState();
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        -10.0f,
+        state.position);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.velocity);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        0.001f,
+        0.0f,
+        state.acceleration);
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorDirection::Stopped),
+        static_cast<int>(state.direction));
+
+    TEST_ASSERT_EQUAL(
+        static_cast<int>(MotorMode::Ready),
+        static_cast<int>(state.mode));
+}
+
 void setup()
 {
     delay(1000);
@@ -187,6 +286,8 @@ void setup()
     RUN_TEST(test_invalid_profile_enters_fault_state);
     RUN_TEST(test_motor_accelerates_towards_target);
     RUN_TEST(test_motor_reaches_target_and_stops);
+    RUN_TEST(test_motor_controlled_stop_decelerates_to_idle);
+    RUN_TEST(test_motor_reverse_motion_reaches_target_and_stops);
 
     UNITY_END();
 }
